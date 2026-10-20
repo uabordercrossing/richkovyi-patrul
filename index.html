@@ -30,6 +30,7 @@ p{margin:6px;font-size:13px;opacity:.7}
 #lbMe .tryzub{width:24px;height:36px;flex:none;display:block}
 #lbMe .avatar{width:34px;height:34px}
 #lbMe .txt{display:flex;flex-direction:column;line-height:1.35}
+#lbMe .nameLine{display:flex;align-items:center;gap:4px}
 #lbMe .txt b{font-size:11px;letter-spacing:.05em;text-transform:uppercase;opacity:.8}
 #lbMe .txt span{font-size:15px;font-weight:700}
 #lbList{overflow-y:auto;font-size:14px;display:flex;flex-direction:column;gap:2px}
@@ -41,14 +42,15 @@ p{margin:6px;font-size:13px;opacity:.7}
 #lbList .left{display:flex;align-items:center;gap:6px;min-width:0}
 #lbList .rank{width:30px;text-align:center;flex:none;font-size:13px;font-weight:700;opacity:.9;display:flex;align-items:center;justify-content:center}
 #lbList .medal{width:20px;height:24px;display:block}
-#lbList .editBtn svg{width:14px;height:14px}
-#lbList .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.editBtn svg{width:14px;height:14px}
+#lbList .name,#lbMe .nameLine .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#lbMe .nameLine .name{max-width:150px}
 #lbList .name small{opacity:.6;font-weight:400}
-#lbList .editBtn{background:none;border:none;color:inherit;font-size:13px;padding:0 2px;cursor:pointer;opacity:.75}
-#lbList .editInput{font-size:13px;padding:3px 6px;border-radius:5px;border:1px solid #8886;background:rgba(255,255,255,.1);color:inherit;width:120px}
-#lbList .saveBtn,#lbList .cancelBtn{background:none;border:none;color:inherit;padding:0 2px;cursor:pointer;display:inline-flex}
-#lbList .saveBtn svg,#lbList .cancelBtn svg{width:15px;height:15px}
-#lbList .cancelBtn{opacity:.6}
+.editBtn{background:none;border:none;color:inherit;font-size:13px;padding:0 2px;cursor:pointer;opacity:.75}
+.editInput{font-size:13px;padding:3px 6px;border-radius:5px;border:1px solid #8886;background:rgba(255,255,255,.1);color:inherit;width:120px}
+.saveBtn,.cancelBtn{background:none;border:none;color:inherit;padding:0 2px;cursor:pointer;display:inline-flex}
+.saveBtn svg,.cancelBtn svg{width:15px;height:15px}
+.cancelBtn{opacity:.6}
 .avatar{width:22px;height:22px;border-radius:50%;flex:none;overflow:hidden;display:inline-flex;padding:0;border:none;background:none}
 .avatar svg{width:100%;height:100%;display:block}
 button.avatar{cursor:pointer}
@@ -181,7 +183,7 @@ function renderLbRow(rank,d,mine){
  row.className='row'+(mine?' me':'');
  const rankLabel=rank<=3?`<span class="medal">${medalSvg(rank)}</span>`:String(rank);
  const avatarHtml=`<span class="avatar">${avatarSvgMarkup(d.avatar)}</span>`;
- row.innerHTML=`<span class="left"><span class="rank">${rankLabel}</span>${avatarHtml}<span class="name">${escapeHtml(leaderboardName(d))}${mine?' <small>(ти)</small>':''}</span>${mine?`<button class="editBtn" title="Змінити ім'я">${ICON_PENCIL}</button>`:''}</span><span>${d.best||0}</span>`;
+ row.innerHTML=`<span class="left"><span class="rank">${rankLabel}</span>${avatarHtml}<span class="name">${escapeHtml(leaderboardName(d))}${mine?' <small>(ти)</small>':''}</span></span><span>${d.best||0}</span>`;
  return row;
 }
 function openAvatarPicker(){
@@ -215,7 +217,7 @@ async function openLeaderboard(){
  list.textContent='Завантаження…';
  if(cloudReady){
   me.style.display='flex';
-  me.innerHTML=`<span class="tryzub">${ICON_TRYZUB}</span><button class="avatarBtn avatar" title="Змінити аватар">${avatarSvgMarkup(cloudAvatar)}</button><span class="txt"><b>Твій результат</b><span>Бали: ${best}</span></span>`;
+  me.innerHTML=`<span class="tryzub">${ICON_TRYZUB}</span><button class="avatarBtn avatar" title="Змінити аватар">${avatarSvgMarkup(cloudAvatar)}</button><span class="txt"><b>Твій результат</b><span class="left nameLine"><span class="name">${escapeHtml(leaderboardName({displayName:cloudDisplayName,firstName:cloudFirstName,lastName:cloudLastName}))}</span><button class="editBtn" title="Змінити ім'я">${ICON_PENCIL}</button></span><span>Бали: ${best}</span></span>`;
  }else{
   me.style.display='none';
  }
@@ -239,8 +241,7 @@ async function openLeaderboard(){
   }
  }catch(e){list.textContent='Не вдалося завантажити';}
 }
-function startNameEdit(row){
- const left=row.querySelector('.left');
+function startNameEdit(left){
  left.innerHTML=`<input class="editInput" maxlength="24" value="${escapeHtml(cloudDisplayName)}"><button class="saveBtn" title="Зберегти">${ICON_CHECK}</button><button class="cancelBtn" title="Скасувати">${ICON_CLOSE}</button>`;
  const input=left.querySelector('.editInput');
  input.focus();input.select();
@@ -263,11 +264,9 @@ document.getElementById('avClose').querySelector('.btnIcon').innerHTML=ICON_CLOS
 document.getElementById('lbBtn').onclick=openLeaderboard;
 document.getElementById('lbClose').onclick=()=>{document.getElementById('lbModal').style.display='none'};
 document.getElementById('avClose').onclick=()=>{document.getElementById('avModal').style.display='none'};
-document.getElementById('lbList').addEventListener('click',e=>{
- if(e.target.classList.contains('editBtn'))startNameEdit(e.target.closest('.row'));
-});
 document.getElementById('lbMe').addEventListener('click',e=>{
  if(e.target.closest('.avatarBtn'))openAvatarPicker();
+ if(e.target.closest('.editBtn'))startNameEdit(e.target.closest('.left'));
 });
 initCloudProgress();
 let ac=null,mg,nb,mo={},sndOn=true,vcOn=false,pd=0,cut=false,vk=0,vph=0,vo=null;
