@@ -19,6 +19,7 @@ p{margin:6px;font-size:13px;opacity:.7}
 #lbList{overflow-y:auto;font-size:14px;display:flex;flex-direction:column;gap:2px}
 #lbList .row{display:flex;align-items:center;justify-content:space-between;padding:4px 6px;border-radius:6px;gap:8px}
 #lbList .row.me{background:#8883}
+#lbList .sep{text-align:center;opacity:.5;padding:2px 0}
 #lbList .left{display:flex;align-items:center;gap:6px;min-width:0}
 #lbList .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #lbList .editBtn{background:none;border:none;color:inherit;font-size:13px;padding:0 2px;cursor:pointer;opacity:.75}
@@ -53,7 +54,7 @@ if(IS_DEV){
  console.log('[dev] using local Firebase emulators + local Worker');
 }
 let cloudReady=false,cloudUid=null;
-let cloudDisplayName='';
+let cloudDisplayName='',cloudFirstName='',cloudLastName='';
 function getDevUser(){
  let id=localStorage.getItem('devUserId');
  if(!id){id=String(900000000+Math.floor(Math.random()*99999999));localStorage.setItem('devUserId',id)}
@@ -75,6 +76,7 @@ async function initCloudProgress(){
   const{token,uid,firstName,lastName}=await res.json();
   await firebase.auth().signInWithCustomToken(token);
   cloudUid=uid;
+  cloudFirstName=firstName;cloudLastName=lastName;
   const docRef=db.collection('progress').doc(uid);
   const snap=await docRef.get();
   if(snap.exists){
@@ -101,6 +103,12 @@ function leaderboardName(d){
 function escapeHtml(s){
  return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
 }
+function renderLbRow(rank,d,mine){
+ const row=document.createElement('div');
+ row.className='row'+(mine?' me':'');
+ row.innerHTML=`<span class="left"><span>${rank}.</span><span class="name">${escapeHtml(leaderboardName(d))}</span>${mine?'<button class="editBtn" title="Змінити ім\'я">✏️</button>':''}</span><span>${d.best||0}</span>`;
+ return row;
+}
 async function openLeaderboard(){
  const modal=document.getElementById('lbModal'),list=document.getElementById('lbList');
  modal.style.display='flex';
@@ -108,15 +116,20 @@ async function openLeaderboard(){
  try{
   const qs=await db.collection('progress').orderBy('best','desc').limit(50).get();
   list.innerHTML='';
-  let i=0;
+  let i=0,foundMe=false;
   qs.forEach(doc=>{
    i++;
-   const d=doc.data(),mine=doc.id===cloudUid,row=document.createElement('div');
-   row.className='row'+(mine?' me':'');
-   row.innerHTML=`<span class="left"><span>${i}.</span><span class="name">${escapeHtml(leaderboardName(d))}</span>${mine?'<button class="editBtn" title="Змінити ім\'я">✏️</button>':''}</span><span>${d.best||0}</span>`;
-   list.appendChild(row);
+   if(doc.id===cloudUid)foundMe=true;
+   list.appendChild(renderLbRow(i,doc.data(),doc.id===cloudUid));
   });
   if(!i)list.textContent='Поки що порожньо';
+  if(cloudReady&&cloudUid&&!foundMe&&best>0){
+   const higherSnap=await db.collection('progress').where('best','>',best).get();
+   const rank=higherSnap.size+1;
+   const sep=document.createElement('div');sep.className='sep';sep.textContent='···';
+   list.appendChild(sep);
+   list.appendChild(renderLbRow(rank,{displayName:cloudDisplayName,firstName:cloudFirstName,lastName:cloudLastName,best},true));
+  }
  }catch(e){list.textContent='Не вдалося завантажити';}
 }
 function startNameEdit(row){
