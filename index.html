@@ -17,16 +17,27 @@ p{margin:6px;font-size:13px;opacity:.7}
 #avModal{z-index:11}
 .card{background:var(--bg);color:var(--fg);width:min(320px,88vw);max-height:80vh;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px}
 .card h2{margin:0;font-size:18px}
+#lbModal .card{background:linear-gradient(#1c2d4c,#131f36);color:#eef2f8;border:2px solid rgba(255,255,255,.22);box-shadow:0 14px 34px rgba(0,0,0,.5)}
+.lbHead{display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.15)}
+.lbHead h2{flex:1;text-align:center;font-size:14px;letter-spacing:.08em;text-transform:uppercase}
+.closeX{background:none;border:none;color:rgba(255,255,255,.7);font-size:16px;padding:0 2px;cursor:pointer;line-height:1}
+#lbMe{display:none;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:10px;padding:8px 10px}
+#lbMe .avatar{width:34px;height:34px}
+#lbMe .txt{display:flex;flex-direction:column;line-height:1.35}
+#lbMe .txt b{font-size:11px;letter-spacing:.05em;text-transform:uppercase;opacity:.8}
+#lbMe .txt span{font-size:15px;font-weight:700}
 #lbList{overflow-y:auto;font-size:14px;display:flex;flex-direction:column;gap:2px}
-#lbList .row{display:flex;align-items:center;justify-content:space-between;padding:4px 6px;border-radius:6px;gap:8px}
-#lbList .row.me{background:#8883}
+#lbList .row{display:flex;align-items:center;justify-content:space-between;padding:5px 6px;border-radius:8px;gap:8px}
+#lbList .row.me{background:#f2c230;color:#1a1f2b}
+#lbList .headerRow{font-size:10px;letter-spacing:.06em;text-transform:uppercase;opacity:.55;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:6px;margin-bottom:2px;border-radius:0}
+#lbList .headerRow .avatar{visibility:hidden}
 #lbList .sep{text-align:center;opacity:.5;padding:2px 0}
 #lbList .left{display:flex;align-items:center;gap:6px;min-width:0}
-#lbList .rank{width:20px;text-align:center;flex:none;font-size:13px;opacity:.85}
+#lbList .rank{width:20px;text-align:center;flex:none;font-size:13px;font-weight:700;opacity:.9}
 #lbList .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #lbList .name small{opacity:.6;font-weight:400}
 #lbList .editBtn{background:none;border:none;color:inherit;font-size:13px;padding:0 2px;cursor:pointer;opacity:.75}
-#lbList .editInput{font-size:13px;padding:3px 6px;border-radius:5px;border:1px solid #8886;background:transparent;color:var(--fg);width:120px}
+#lbList .editInput{font-size:13px;padding:3px 6px;border-radius:5px;border:1px solid #8886;background:rgba(255,255,255,.1);color:inherit;width:120px}
 #lbList .saveBtn,#lbList .cancelBtn{background:none;border:none;color:inherit;font-size:15px;padding:0 2px;cursor:pointer}
 #lbList .cancelBtn{opacity:.6;font-size:13px}
 .avatar{width:22px;height:22px;border-radius:50%;flex:none;overflow:hidden;display:inline-flex;padding:0;border:none;background:none}
@@ -36,7 +47,7 @@ button.avatar{cursor:pointer}
 .avCell{padding:0;border:3px solid transparent;border-radius:50%;cursor:pointer;overflow:hidden;background:none;aspect-ratio:1}
 .avCell svg{width:100%;height:100%;display:block}
 .avCell.selected{border-color:#f2c94c}
-#lbClose,#avClose{align-self:flex-end;font-size:14px}
+#avClose{align-self:flex-end;font-size:14px}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -49,9 +60,9 @@ button.avatar{cursor:pointer}
 </div>
 <div id="bar"><button id="snd">🔊</button></div>
 <div id="lbModal"><div class="card">
- <h2>Таблиця лідерів</h2>
+ <div class="lbHead"><h2>Таблиця лідерів</h2><button id="lbClose" class="closeX">✕</button></div>
+ <div id="lbMe"></div>
  <div id="lbList">Завантаження…</div>
- <button id="lbClose">Закрити ✕</button>
 </div></div>
 <div id="avModal"><div class="card">
  <h2>Вибір аватара</h2>
@@ -71,19 +82,19 @@ if(IS_DEV){
 let cloudReady=false,cloudUid=null;
 let cloudDisplayName='',cloudFirstName='',cloudLastName='',cloudAvatar='soldier_m';
 const AVATARS={
- soldier_m:{hat:'<ellipse cx="32" cy="20" rx="19" ry="11" fill="#4a6b3a"/><rect x="18" y="25" width="28" height="6" rx="3" fill="#2f4a26"/>',collar:'#3b6fb6'},
- soldier_f:{hat:'<path d="M15 42 Q10 30 17 23" stroke="#5b3a1e" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M49 42 Q54 30 47 23" stroke="#5b3a1e" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="32" cy="20" rx="19" ry="11" fill="#4a6b3a"/><rect x="18" y="25" width="28" height="6" rx="3" fill="#2f4a26"/>',collar:'#3b6fb6'},
- nurse:{hat:'<path d="M14 26 Q32 10 50 26 L50 30 Q32 20 14 30 Z" fill="#fff"/><rect x="29" y="14" width="6" height="14" fill="#c0392b"/><rect x="24" y="19" width="16" height="6" fill="#c0392b"/>',collar:'#e8edf0'},
- officer:{hat:'<path d="M12 28 Q32 8 52 28 L52 33 L12 33 Z" fill="#20242b"/><rect x="10" y="30" width="44" height="6" rx="2" fill="#15181d"/><circle cx="32" cy="21" r="4" fill="#d8b33a"/>',collar:'#2b2f36'},
- elder:{hat:'<path d="M12 30 Q14 12 32 12 Q50 12 52 30 Q52 35 46 35 L18 35 Q12 35 12 30 Z" fill="#7a5a3a"/><rect x="10" y="30" width="44" height="8" rx="3" fill="#5c4327"/><path d="M23 40 Q32 45 41 40 Q36 46 32 46 Q28 46 23 40 Z" fill="#cfcfcf"/>',collar:'#4a6b3a'},
- pilot:{hat:'<path d="M12 30 Q14 10 32 10 Q50 10 52 30 L52 35 L12 35 Z" fill="#6b4a2f"/><circle cx="24" cy="31" r="6" fill="#dfeffd" stroke="#333" stroke-width="2"/><circle cx="40" cy="31" r="6" fill="#dfeffd" stroke="#333" stroke-width="2"/><rect x="28" y="29" width="8" height="4" fill="#333"/>',collar:'#6b4a2f'},
- sailor:{hat:'<ellipse cx="32" cy="22" rx="18" ry="10" fill="#fff"/><rect x="14" y="26" width="36" height="5" fill="#0057b7"/>',collar:'#fff',collarExtra:'<rect x="15" y="54" width="34" height="3" fill="#0057b7"/><rect x="15" y="60" width="34" height="3" fill="#0057b7"/>'},
- masked:{hat:'<path d="M14 18 Q32 6 50 18 L50 44 Q32 55 14 44 Z" fill="#20242b"/><ellipse cx="24" cy="35" rx="4" ry="3" fill="#fff"/><ellipse cx="40" cy="35" rx="4" ry="3" fill="#fff"/>',collar:'#20242b'},
- headset:{hat:'<ellipse cx="32" cy="20" rx="19" ry="11" fill="#4a6b3a"/><rect x="18" y="25" width="28" height="6" rx="3" fill="#2f4a26"/><path d="M16 32 Q32 48 48 32" stroke="#222" stroke-width="3" fill="none"/><circle cx="48" cy="32" r="5" fill="#222"/>',collar:'#3b6fb6'}
+ soldier_m:{bg:'#9bc7e4',hat:'<ellipse cx="32" cy="20" rx="19" ry="11" fill="#4a6b3a"/><rect x="18" y="25" width="28" height="6" rx="3" fill="#2f4a26"/>',collar:'#3b6fb6'},
+ soldier_f:{bg:'#f3c5d0',hat:'<path d="M15 42 Q10 30 17 23" stroke="#5b3a1e" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M49 42 Q54 30 47 23" stroke="#5b3a1e" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="32" cy="20" rx="19" ry="11" fill="#4a6b3a"/><rect x="18" y="25" width="28" height="6" rx="3" fill="#2f4a26"/>',collar:'#3b6fb6'},
+ nurse:{bg:'#cfe8e0',hat:'<path d="M14 26 Q32 10 50 26 L50 30 Q32 20 14 30 Z" fill="#fff"/><rect x="29" y="14" width="6" height="14" fill="#c0392b"/><rect x="24" y="19" width="16" height="6" fill="#c0392b"/>',collar:'#e8edf0'},
+ officer:{bg:'#c9ced6',hat:'<path d="M12 28 Q32 8 52 28 L52 33 L12 33 Z" fill="#20242b"/><rect x="10" y="30" width="44" height="6" rx="2" fill="#15181d"/><circle cx="32" cy="21" r="4" fill="#d8b33a"/>',collar:'#2b2f36'},
+ elder:{bg:'#e6d3b3',hat:'<path d="M12 30 Q14 12 32 12 Q50 12 52 30 Q52 35 46 35 L18 35 Q12 35 12 30 Z" fill="#7a5a3a"/><rect x="10" y="30" width="44" height="8" rx="3" fill="#5c4327"/><path d="M23 40 Q32 45 41 40 Q36 46 32 46 Q28 46 23 40 Z" fill="#cfcfcf"/>',collar:'#4a6b3a'},
+ pilot:{bg:'#d9c4a8',hat:'<path d="M12 30 Q14 10 32 10 Q50 10 52 30 L52 35 L12 35 Z" fill="#6b4a2f"/><circle cx="24" cy="31" r="6" fill="#dfeffd" stroke="#333" stroke-width="2"/><circle cx="40" cy="31" r="6" fill="#dfeffd" stroke="#333" stroke-width="2"/><rect x="28" y="29" width="8" height="4" fill="#333"/>',collar:'#6b4a2f'},
+ sailor:{bg:'#bcd9f2',hat:'<ellipse cx="32" cy="22" rx="18" ry="10" fill="#fff"/><rect x="14" y="26" width="36" height="5" fill="#0057b7"/>',collar:'#fff',collarExtra:'<rect x="15" y="54" width="34" height="3" fill="#0057b7"/><rect x="15" y="60" width="34" height="3" fill="#0057b7"/>'},
+ masked:{bg:'#c7cbd1',hat:'<path d="M14 18 Q32 6 50 18 L50 44 Q32 55 14 44 Z" fill="#20242b"/><ellipse cx="24" cy="35" rx="4" ry="3" fill="#fff"/><ellipse cx="40" cy="35" rx="4" ry="3" fill="#fff"/>',collar:'#20242b'},
+ headset:{bg:'#b9d8c2',hat:'<ellipse cx="32" cy="20" rx="19" ry="11" fill="#4a6b3a"/><rect x="18" y="25" width="28" height="6" rx="3" fill="#2f4a26"/><path d="M16 32 Q32 48 48 32" stroke="#222" stroke-width="3" fill="none"/><circle cx="48" cy="32" r="5" fill="#222"/>',collar:'#3b6fb6'}
 };
 function avatarSvgMarkup(id){
  const a=AVATARS[id]||AVATARS.soldier_m;
- return `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="32" fill="#cfd8dc"/><circle cx="32" cy="36" r="15" fill="#e0b896"/>${a.hat}<rect x="15" y="50" width="34" height="16" rx="6" fill="${a.collar}"/>${a.collarExtra||''}</svg>`;
+ return `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="32" fill="${a.bg}"/><circle cx="32" cy="36" r="15" fill="#e0b896"/>${a.hat}<rect x="15" y="50" width="34" height="16" rx="6" fill="${a.collar}"/>${a.collarExtra||''}</svg>`;
 }
 function getDevUser(){
  let id=localStorage.getItem('devUserId');
@@ -142,7 +153,7 @@ function escapeHtml(s){
 function renderLbRow(rank,d,mine){
  const row=document.createElement('div');
  row.className='row'+(mine?' me':'');
- const rankLabel=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':rank+'.';
+ const rankLabel=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':String(rank);
  const avatarHtml=mine
   ?`<button class="avatarBtn avatar" title="Змінити аватар">${avatarSvgMarkup(d.avatar)}</button>`
   :`<span class="avatar">${avatarSvgMarkup(d.avatar)}</span>`;
@@ -168,20 +179,33 @@ function openAvatarPicker(){
  });
  modal.style.display='flex';
 }
+function headerRow(){
+ const row=document.createElement('div');
+ row.className='row headerRow';
+ row.innerHTML=`<span class="left"><span class="rank">Ранг</span><span class="avatar"></span><span class="name">Гравець</span></span><span>Бали</span>`;
+ return row;
+}
 async function openLeaderboard(){
- const modal=document.getElementById('lbModal'),list=document.getElementById('lbList');
+ const modal=document.getElementById('lbModal'),list=document.getElementById('lbList'),me=document.getElementById('lbMe');
  modal.style.display='flex';
  list.textContent='Завантаження…';
+ if(cloudReady){
+  me.style.display='flex';
+  me.innerHTML=`<span class="avatar">${avatarSvgMarkup(cloudAvatar)}</span><span class="txt"><b>Твій результат</b><span>Бали: ${best}</span></span>`;
+ }else{
+  me.style.display='none';
+ }
  try{
   const qs=await db.collection('progress').orderBy('best','desc').limit(50).get();
   list.innerHTML='';
+  list.appendChild(headerRow());
   let i=0,foundMe=false;
   qs.forEach(doc=>{
    i++;
    if(doc.id===cloudUid)foundMe=true;
    list.appendChild(renderLbRow(i,doc.data(),doc.id===cloudUid));
   });
-  if(!i)list.textContent='Поки що порожньо';
+  if(!i){const empty=document.createElement('div');empty.textContent='Поки що порожньо';empty.style.padding='6px';list.appendChild(empty)}
   if(cloudReady&&cloudUid&&!foundMe&&best>0){
    const higherSnap=await db.collection('progress').where('best','>',best).get();
    const rank=higherSnap.size+1;
