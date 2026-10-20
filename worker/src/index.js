@@ -109,28 +109,45 @@ export default {
 			});
 		}
 
-		const { initData } = body;
-		if (!initData) {
-			return new Response(JSON.stringify({ error: 'missing initData' }), {
-				status: 400,
-				headers: { ...headers, 'Content-Type': 'application/json' },
-			});
-		}
-
-		const verification = await verifyTelegramInitData(initData, env.TELEGRAM_BOT_TOKEN);
-		if (!verification.ok) {
-			return new Response(JSON.stringify({ error: 'unauthorized', reason: verification.reason }), {
-				status: 401,
-				headers: { ...headers, 'Content-Type': 'application/json' },
-			});
+		let verification;
+		if (env.DEV_MODE === 'true') {
+			const { devUser } = body;
+			if (!devUser || !devUser.id) {
+				return new Response(JSON.stringify({ error: 'missing devUser' }), {
+					status: 400,
+					headers: { ...headers, 'Content-Type': 'application/json' },
+				});
+			}
+			verification = { ok: true, user: devUser };
+		} else {
+			const { initData } = body;
+			if (!initData) {
+				return new Response(JSON.stringify({ error: 'missing initData' }), {
+					status: 400,
+					headers: { ...headers, 'Content-Type': 'application/json' },
+				});
+			}
+			verification = await verifyTelegramInitData(initData, env.TELEGRAM_BOT_TOKEN);
+			if (!verification.ok) {
+				return new Response(JSON.stringify({ error: 'unauthorized', reason: verification.reason }), {
+					status: 401,
+					headers: { ...headers, 'Content-Type': 'application/json' },
+				});
+			}
 		}
 
 		const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT);
 		const uid = `tg_${verification.user.id}`;
 		const token = await createFirebaseCustomToken(serviceAccount, uid);
 
-		return new Response(JSON.stringify({ token, uid }), {
-			headers: { ...headers, 'Content-Type': 'application/json' },
-		});
+		return new Response(
+			JSON.stringify({
+				token,
+				uid,
+				firstName: verification.user.first_name || '',
+				lastName: verification.user.last_name || '',
+			}),
+			{ headers: { ...headers, 'Content-Type': 'application/json' } },
+		);
 	},
 };

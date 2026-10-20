@@ -1,2 +1,6 @@
 worker/node_modules/
 worker/.wrangler/
+worker/.dev.vars
+firebase-debug.log
+firestore-debug.log
+.firebase/
