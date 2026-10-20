@@ -17,7 +17,9 @@ pids=()
 cleanup() { for p in "${pids[@]}"; do kill "$p" 2>/dev/null; done; }
 trap cleanup EXIT INT TERM
 
-npx --yes firebase-tools emulators:start --only firestore,auth --project richkovyi-patrul &
+mkdir -p .emulator-data
+npx --yes firebase-tools emulators:start --only firestore,auth --project richkovyi-patrul \
+  --import=./.emulator-data --export-on-exit=./.emulator-data &
 pids+=($!)
 
 (cd worker && npx wrangler dev) &

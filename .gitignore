@@ -4,3 +4,4 @@ worker/.dev.vars
 firebase-debug.log
 firestore-debug.log
 .firebase/
+.emulator-data/
