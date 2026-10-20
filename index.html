@@ -6,7 +6,7 @@
 :root{--bg:#f4f1ea;--fg:#222;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1d21;--fg:#eee}}
 :root[data-theme="dark"]{--bg:#1b1d21;--fg:#eee}
-html,body{height:100%;margin:0}
+html,body{height:100%;margin:0;overflow:hidden}
 body{background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center}
 p{margin:6px;font-size:13px;opacity:.7}
 #bar{display:flex;gap:8px;margin:10px 0 14px}button{font-size:18px;padding:3px 10px;border-radius:8px;border:1px solid #8886;background:transparent;color:var(--fg);font-family:inherit}
@@ -15,8 +15,8 @@ p{margin:6px;font-size:13px;opacity:.7}
 .iconBtn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0}
 .iconBtn svg{width:18px;height:18px}
 .closeX{width:18px;height:18px}
-#stage{position:relative;display:inline-block;max-width:100%;max-height:88%}
-#stage canvas{display:block;max-width:100%;max-height:100%;touch-action:none;border-radius:10px}
+#stage{position:relative;display:block}
+#stage canvas{display:block;width:100%;height:100%;touch-action:none;border-radius:10px}
 #lbBtn{display:none;position:absolute;left:50%;top:66%;transform:translateX(-50%);font-size:14px;padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.5);background:rgba(20,30,20,.55);color:#fff;white-space:nowrap}
 #lbModal,#avModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);align-items:center;justify-content:center;z-index:10}
 #avModal{z-index:11}
@@ -304,7 +304,29 @@ sndBtn.innerHTML=ICON_SPEAKER_ON;
 sndBtn.onclick=()=>{initAudio();sndOn=!sndOn;if(mg)mg.gain.value=sndOn?.8:0;sndBtn.innerHTML=sndOn?ICON_SPEAKER_ON:ICON_SPEAKER_OFF};
 
 const c=document.getElementById('c'),g=c.getContext('2d');
-const W=360,H=560,TOP=120,BOT=440,FY=BOT+52,DUR=.4;const CH=['Ура, я врятований!','Свобода!','Я на волі!','Ура, я вільний!','Нарешті воля!','Я врятувався!','Ура, свобода!'];let sdone=true,sdir=-Math.PI/2,stg=null;function motorCatch(s){s.st='done';score++;sfx.pull();for(let k=0;k<3;k++)rp.push({x:s.x,y:s.y,r:4,t:1.1,d:k*.18});for(let k=0;k<12;k++)bb.push({x:s.x+(Math.random()-.5)*22,y:s.y+(Math.random()-.5)*10,r:1.5+Math.random()*3,vy:-(15+Math.random()*25),t:.9+Math.random()*.8,ph:Math.random()*6});fx.push({x:boat.x+(Math.random()-.5)*30,y:boat.y-14,t:.9,s:['Стояти!','Назад!','Куди зібрався?','Попався!','Кордон на замку!','Ану тримай!','Не пройдеш!','Разом до перемоги!'][Math.random()*8|0]});return true}function splash(x,y){sfx.whack();sp.push({x,y,t:0,L:.7});for(let k=0;k<16;k++)dr.push({x:x+(Math.random()-.5)*8,y:y-8,vx:(Math.random()-.5)*80,vy:-(70+Math.random()*80),life:.5+Math.random()*.4})}function aim(){let b=null,bd=52;for(const s of sw)if(s.st==='swim'){const d=Math.hypot(s.x-boat.x,s.y-boat.y);if(d<bd){bd=d;b=s}}stg=b;return b?Math.atan2(b.y-boat.y,b.x-boat.x):-Math.PI/2}
+const W=360,H=560,TOP=120,BOT=440,FY=BOT+52,DUR=.4;
+const stage=document.getElementById('stage');
+const DPR=Math.min(window.devicePixelRatio||1,2);
+c.width=W*DPR;c.height=H*DPR;
+g.setTransform(DPR,0,0,DPR,0,0);
+function fitStage(){
+ const barH=document.getElementById('bar').getBoundingClientRect().height||34;
+ const tg=window.Telegram&&window.Telegram.WebApp;
+ const vh=(tg&&tg.viewportStableHeight)||window.innerHeight;
+ const availW=window.innerWidth-16;
+ const availH=vh-barH-26;
+ const ratio=W/H;
+ let dw=availW,dh=dw/ratio;
+ if(dh>availH){dh=availH;dw=dh*ratio}
+ stage.style.width=Math.round(dw)+'px';
+ stage.style.height=Math.round(dh)+'px';
+}
+fitStage();
+window.addEventListener('resize',fitStage);
+window.addEventListener('orientationchange',fitStage);
+if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.onEvent)window.Telegram.WebApp.onEvent('viewportChanged',fitStage);const CH=['Ура, я врятований!','Свобода!','Я на волі!','Ура, я вільний!','Нарешті воля!','Я врятувався!','Ура, свобода!','Я вирвався з цієї тюрми!','Все, більше жодних грат і закритих кордонів!','Я не кріпак! Я вільна людина!','Вони думали, що володіють моїм життям... Не вгадали!','Я живий!','Більше жодних облав, бусиків і полювання на людей!','Повітря свободи!','Вижив! Попри всі їхні пастки та полювання!','Яка це "демократія", коли з власної країни треба тікати по воді?!','Заточили власний народ!','Свої ж полюють як на собак!','Більше ніхто не вирішуватиме за мене, жити мені чи вмирати!','Ура! Свобода! Я живий!','Все, тут мене вже не дістануть!','Я прорвався! Моє життя належить тільки мені!'];
+const CATCH_PHRASES=['Стояти!','Назад!','Куди зібрався?','Попався!','Кордон на замку!','Ану тримай!','Не пройдеш!','Разом до перемоги!','Куди ми так поспішаємо?','Твій маршрут змінено!','Незламність відновлено!','Фортеця під захистом, а ти — ні!','Перевірка документів!','Куди без повістки?!','Прийшов час оновити дані!','Доброго вечора, ми з ДПСУ!','Аквамен, здавайся!','Куди пливемо?','Анульовано!','Де документи?'];
+let sdone=true,sdir=-Math.PI/2,stg=null;function motorCatch(s){s.st='done';score++;sfx.pull();for(let k=0;k<3;k++)rp.push({x:s.x,y:s.y,r:4,t:1.1,d:k*.18});for(let k=0;k<12;k++)bb.push({x:s.x+(Math.random()-.5)*22,y:s.y+(Math.random()-.5)*10,r:1.5+Math.random()*3,vy:-(15+Math.random()*25),t:.9+Math.random()*.8,ph:Math.random()*6});fx.push({x:boat.x+(Math.random()-.5)*30,y:boat.y-14,t:.9,s:CATCH_PHRASES[Math.random()*CATCH_PHRASES.length|0]});return true}function splash(x,y){sfx.whack();sp.push({x,y,t:0,L:.7});for(let k=0;k<16;k++)dr.push({x:x+(Math.random()-.5)*8,y:y-8,vx:(Math.random()-.5)*80,vy:-(70+Math.random()*80),life:.5+Math.random()*.4})}function aim(){let b=null,bd=52;for(const s of sw)if(s.st==='swim'){const d=Math.hypot(s.x-boat.x,s.y-boat.y);if(d<bd){bd=d;b=s}}stg=b;return b?Math.atan2(b.y-boat.y,b.x-boat.x):-Math.PI/2}
 let boat,sw,fx,rp=[],bb=[],sp=[],dr=[],stn=[],score,esc,t,spawn,swing,cd,over,best=0,totalCoins=0,tx,ty;
 function reset(){boat={x:180,y:300};tx=180;ty=300;sw=[];fx=[];rp=[];bb=[];sp=[];dr=[];stn=[];score=0;esc=0;t=0;spawn=0;swing=0;cd=0;over=false;updateLbBtn()}
 reset();
@@ -313,7 +335,7 @@ c.addEventListener('pointerdown',e=>{initAudio();if(ac&&ac.state==='suspended')a
 c.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='mouse')[tx,ty]=pos(e)});
 function hit(){if(cd>0||over)return;swing=DUR;cd=DUR;sdone=false;sdir=aim();sfx.swish()}
 function catchNow(){
- for(const s of sw)if(s.st==='swim'&&Math.hypot(s.x-boat.x,s.y-boat.y)<52){s.st='done';score++;sfx.pull();for(let k=0;k<3;k++)rp.push({x:s.x,y:s.y,r:4,t:1.1,d:k*.18});for(let k=0;k<12;k++)bb.push({x:s.x+(Math.random()-.5)*22,y:s.y+(Math.random()-.5)*10,r:1.5+Math.random()*3,vy:-(15+Math.random()*25),t:.9+Math.random()*.8,ph:Math.random()*6});fx.push({x:boat.x+(Math.random()-.5)*30,y:boat.y-14,t:.9,s:['Стояти!','Назад!','Куди зібрався?','Попався!','Кордон на замку!','Ану тримай!','Не пройдеш!','Разом до перемоги!'][Math.random()*8|0]})}}
+ for(const s of sw)if(s.st==='swim'&&Math.hypot(s.x-boat.x,s.y-boat.y)<52){s.st='done';score++;sfx.pull();for(let k=0;k<3;k++)rp.push({x:s.x,y:s.y,r:4,t:1.1,d:k*.18});for(let k=0;k<12;k++)bb.push({x:s.x+(Math.random()-.5)*22,y:s.y+(Math.random()-.5)*10,r:1.5+Math.random()*3,vy:-(15+Math.random()*25),t:.9+Math.random()*.8,ph:Math.random()*6});fx.push({x:boat.x+(Math.random()-.5)*30,y:boat.y-14,t:.9,s:CATCH_PHRASES[Math.random()*CATCH_PHRASES.length|0]})}}
 let started=false;
 function upd(d){if(!started){t+=d;return}t+=d;cd-=d;swing-=d;if(swing>0&&!sdone&&1-swing/DUR>=.4){sdone=true;const tg=stg&&stg.st==='swim'?stg:null;splash(tg?tg.x:boat.x+Math.cos(sdir)*52,tg?tg.y:boat.y+Math.sin(sdir)*52);catchNow()}if(over){voiceSnd(0,0);return}
  const dx=tx-boat.x,dy=Math.min(Math.max(ty,TOP+20),BOT-20)-boat.y,L=Math.hypot(dx,dy);
