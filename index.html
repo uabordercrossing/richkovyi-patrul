@@ -199,7 +199,7 @@ function openAvatarPicker(){
    if(cloudReady&&cloudUid){
     try{await db.collection('progress').doc(cloudUid).set({avatar:id},{merge:true})}catch(e){}
    }
-   openLeaderboard();
+   openLeaderboard(true);
   };
   grid.appendChild(cell);
  });
@@ -211,34 +211,49 @@ function headerRow(){
  row.innerHTML=`<span class="left"><span class="rank">Ранг</span><span class="avatar"></span><span class="name">Гравець</span></span><span>Бали</span>`;
  return row;
 }
-async function openLeaderboard(){
+const LB_CACHE_MS=60000,LB_RANK_CAP=300;
+let lbCache={ts:0,rows:null,rank:null,best:null};
+function renderLbFromCache(){
+ const list=document.getElementById('lbList');
+ list.innerHTML='';
+ list.appendChild(headerRow());
+ let i=0,foundMe=false;
+ lbCache.rows.forEach(({id,data})=>{
+  i++;
+  if(id===cloudUid)foundMe=true;
+  list.appendChild(renderLbRow(i,data,id===cloudUid));
+ });
+ if(!i){const empty=document.createElement('div');empty.textContent='Поки що порожньо';empty.style.padding='6px';list.appendChild(empty)}
+ if(cloudReady&&cloudUid&&!foundMe&&best>0&&lbCache.rank!=null){
+  const sep=document.createElement('div');sep.className='sep';sep.textContent='···';
+  list.appendChild(sep);
+  list.appendChild(renderLbRow(lbCache.rank,{displayName:cloudDisplayName,firstName:cloudFirstName,lastName:cloudLastName,avatar:cloudAvatar,best},true));
+ }
+}
+async function openLeaderboard(force){
  const modal=document.getElementById('lbModal'),list=document.getElementById('lbList'),me=document.getElementById('lbMe');
  modal.style.display='flex';
- list.textContent='Завантаження…';
  if(cloudReady){
   me.style.display='flex';
   me.innerHTML=`<span class="tryzub">${ICON_TRYZUB}</span><button class="avatarBtn avatar" title="Змінити аватар">${avatarSvgMarkup(cloudAvatar)}</button><span class="txt"><b>Твій результат</b><span class="left nameLine"><span class="name">${escapeHtml(leaderboardName({displayName:cloudDisplayName,firstName:cloudFirstName,lastName:cloudLastName}))}</span><button class="editBtn" title="Змінити ім'я">${ICON_PENCIL}</button></span><span>Бали: ${best}</span></span>`;
  }else{
   me.style.display='none';
  }
+ const fresh=!force&&lbCache.rows&&lbCache.best===best&&(Date.now()-lbCache.ts)<LB_CACHE_MS;
+ if(fresh){renderLbFromCache();return}
+ list.textContent='Завантаження…';
  try{
   const qs=await db.collection('progress').orderBy('best','desc').limit(50).get();
-  list.innerHTML='';
-  list.appendChild(headerRow());
-  let i=0,foundMe=false;
-  qs.forEach(doc=>{
-   i++;
-   if(doc.id===cloudUid)foundMe=true;
-   list.appendChild(renderLbRow(i,doc.data(),doc.id===cloudUid));
-  });
-  if(!i){const empty=document.createElement('div');empty.textContent='Поки що порожньо';empty.style.padding='6px';list.appendChild(empty)}
+  const rows=[];
+  let foundMe=false;
+  qs.forEach(doc=>{if(doc.id===cloudUid)foundMe=true;rows.push({id:doc.id,data:doc.data()})});
+  let rank=null;
   if(cloudReady&&cloudUid&&!foundMe&&best>0){
-   const higherSnap=await db.collection('progress').where('best','>',best).get();
-   const rank=higherSnap.size+1;
-   const sep=document.createElement('div');sep.className='sep';sep.textContent='···';
-   list.appendChild(sep);
-   list.appendChild(renderLbRow(rank,{displayName:cloudDisplayName,firstName:cloudFirstName,lastName:cloudLastName,avatar:cloudAvatar,best},true));
+   const higherSnap=await db.collection('progress').where('best','>',best).limit(LB_RANK_CAP).get();
+   rank=higherSnap.size>=LB_RANK_CAP?`${LB_RANK_CAP}+`:higherSnap.size+1;
   }
+  lbCache={ts:Date.now(),rows,rank,best};
+  renderLbFromCache();
  }catch(e){list.textContent='Не вдалося завантажити';}
 }
 function startNameEdit(left){
@@ -251,7 +266,7 @@ function startNameEdit(left){
   if(cloudReady&&cloudUid){
    try{await db.collection('progress').doc(cloudUid).set({displayName:v},{merge:true})}catch(e){}
   }
-  await openLeaderboard();
+  await openLeaderboard(true);
  };
  const cancel=()=>{openLeaderboard()};
  left.querySelector('.saveBtn').onclick=save;
@@ -261,7 +276,7 @@ function startNameEdit(left){
 document.getElementById('lbBtn').innerHTML=`<span class="btnIcon">${ICON_TROPHY}</span> Таблиця лідерів`;
 document.getElementById('lbClose').innerHTML=ICON_CLOSE;
 document.getElementById('avClose').querySelector('.btnIcon').innerHTML=ICON_CLOSE;
-document.getElementById('lbBtn').onclick=openLeaderboard;
+document.getElementById('lbBtn').onclick=()=>openLeaderboard();
 document.getElementById('lbClose').onclick=()=>{document.getElementById('lbModal').style.display='none'};
 document.getElementById('avClose').onclick=()=>{document.getElementById('avModal').style.display='none'};
 document.getElementById('lbMe').addEventListener('click',e=>{
