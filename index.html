@@ -59,6 +59,7 @@ button.avatar{cursor:pointer}
 .avCell svg{width:100%;height:100%;display:block}
 .avCell.selected{border-color:#f2c94c}
 #avClose{align-self:flex-end;font-size:14px}
+.devBtn{font-size:12px;padding:4px 8px}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -69,7 +70,7 @@ button.avatar{cursor:pointer}
  <canvas id="c" width="360" height="560"></canvas>
  <button id="lbBtn"></button>
 </div>
-<div id="bar"><button id="snd" class="iconBtn"></button></div>
+<div id="bar"><button id="snd" class="iconBtn"></button><button id="devCoinsBtn" class="devBtn" style="display:none">+5000 монет (тест)</button></div>
 <div id="lbModal"><div class="card">
  <div class="lbHead"><h2>Таблиця лідерів</h2><button id="lbClose" class="closeX"></button></div>
  <div id="lbMe"></div>
@@ -318,6 +319,11 @@ document.getElementById('lbMe').addEventListener('click',e=>{
  if(e.target.closest('.editBtn'))startNameEdit(e.target.closest('.left'));
 });
 initCloudProgress();
+if(IS_DEV){
+ const devBtn=document.getElementById('devCoinsBtn');
+ devBtn.style.display='inline-block';
+ devBtn.onclick=()=>{totalCoins+=5000;if(cloudReady&&cloudUid)awardCoins(5000)};
+}
 let ac=null,mg,nb,mo={},sndOn=true,vcOn=false,pd=0,cut=false,vk=0,vph=0,vo=null;
 function initAudio(){if(ac)return;try{ac=new(window.AudioContext||window.webkitAudioContext)()}catch(e){return}mg=ac.createGain();mg.gain.value=sndOn?.8:0;const cp=ac.createDynamicsCompressor();mg.connect(cp);cp.connect(ac.destination);nb=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
  const ws=ac.createBufferSource();ws.buffer=nb;ws.loop=true;const wf=ac.createBiquadFilter();wf.type='lowpass';wf.frequency.value=700;const wg=ac.createGain();wg.gain.value=.07;ws.connect(wf);wf.connect(wg);wg.connect(mg);ws.start();const lf=ac.createOscillator();lf.frequency.value=.25;const lg=ac.createGain();lg.gain.value=.03;lf.connect(lg);lg.connect(wg.gain);lf.start();
