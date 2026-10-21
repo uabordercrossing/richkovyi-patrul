@@ -111,6 +111,46 @@ if(IS_DEV){
 }
 let cloudReady=false,cloudUid=null;
 let cloudDisplayName='',cloudFirstName='',cloudLastName='',cloudAvatar='soldier_cap';
+const AK47_SVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="800" height="300">
+  <style>
+    .wood { fill: #8B4513; stroke: #5C2E0B; stroke-width: 3; stroke-linejoin: round; }
+    .wood-light { fill: #A0522D; }
+    .metal { fill: #33373B; stroke: #1A1C1E; stroke-width: 3; stroke-linejoin: round; }
+    .metal-dark { fill: #222528; }
+    .metal-light { fill: #4F5459; }
+    .mag { fill: #B85C00; stroke: #7A3D00; stroke-width: 3; stroke-linejoin: round; }
+    .shadow { fill: rgba(0,0,0,0.15); }
+  </style>
+  <g id="ak47" transform="translate(50, 50)">
+    <path class="wood" d="M 100 110 L 10 135 C 5 136 0 145 0 155 L 0 185 C 0 195 10 200 20 198 L 110 160 Z" />
+    <path class="wood-light" d="M 15 142 L 95 120 L 100 132 L 20 155 Z" />
+    <rect class="metal-dark" x="0" y="145" width="8" height="48" rx="3" />
+    <rect class="metal" x="95" y="112" width="20" height="48" rx="2" />
+    <rect class="metal" x="115" y="110" width="180" height="52" rx="4" />
+    <path class="metal-light" d="M 115 110 L 295 110 L 290 122 L 115 122 Z" />
+    <rect class="metal-dark" x="170" y="128" width="45" height="8" rx="3" transform="rotate(10, 170, 128)" />
+    <rect class="metal-light" x="225" y="118" width="12" height="6" rx="2" />
+    <path class="wood" d="M 130 162 L 115 225 C 113 235 120 242 130 242 L 148 242 C 158 242 163 235 160 225 L 155 162 Z" />
+    <path class="wood-light" d="M 132 170 L 122 220 L 130 220 L 138 170 Z" />
+    <path class="metal" d="M 155 162 C 155 185 185 185 190 162" fill="none" stroke-width="4" />
+    <path class="metal-dark" d="M 170 162 Q 168 173 175 175" fill="none" stroke-width="4" stroke-linecap="round" />
+    <path class="mag" d="M 210 162 C 215 200 230 240 265 265 C 275 272 290 265 285 250 C 260 220 248 185 245 162 Z" />
+    <path d="M 228 185 C 235 210 248 235 268 253" fill="none" stroke="#7A3D00" stroke-width="3" stroke-linecap="round" />
+    <rect class="metal-dark" x="200" y="162" width="8" height="12" rx="2" />
+    <path class="wood" d="M 295 125 L 420 128 C 425 128 428 135 425 142 L 415 160 C 412 163 405 162 400 162 L 295 162 Z" />
+    <path class="wood-light" d="M 300 132 L 410 135 L 405 142 L 300 140 Z" />
+    <rect class="metal-dark" x="293" y="122" width="8" height="42" rx="2" />
+    <rect class="metal-dark" x="417" y="126" width="8" height="30" rx="2" />
+    <rect class="metal" x="295" y="112" width="130" height="12" rx="2" />
+    <rect class="metal" x="425" y="120" width="170" height="12" rx="2" />
+    <path class="metal" d="M 425 110 L 445 110 L 450 120 L 425 124 Z" />
+    <path class="metal" d="M 560 120 L 565 95 C 565 92 575 92 575 95 L 580 120 Z" />
+    <circle class="metal-dark" cx="570" cy="102" r="3" />
+    <path class="metal-dark" d="M 595 118 L 615 116 L 618 132 L 595 134 Z" />
+  </g>
+</svg>`;
+const ak47Img=new Image();
+ak47Img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(AK47_SVG);
 let upgrades={weapon:0,motor:0,belt:0};
 const WEAPON_LEVELS=[null,
  {type:'pistol',cd:1.8,range:90,cost:50},
@@ -536,7 +576,7 @@ function draw(){
   g.fillStyle='#ffd54a';g.beginPath();g.arc(x,y-17.5,1.5,0,7);g.fill();
   if(o===-12&&upgrades.weapon>0){const wl=WEAPON_LEVELS[upgrades.weapon];g.save();g.translate(x-6,y-1);
    if(wl.type==='pistol'){g.fillStyle='#2a2a2a';g.fillRect(0,-2.5,10,4);g.fillRect(6,-2.5,3,2);g.save();g.translate(2,1.5);g.rotate(1.3);g.fillStyle='#1c1c1c';g.fillRect(-2,0,4,7);g.restore()}
-   else{g.fillStyle='#2f2f2f';g.fillRect(-7,-2.5,22,4);g.fillStyle='#6a4a28';g.fillRect(-11,-2,5,3.5);g.save();g.translate(11,1.5);g.rotate(.55);g.fillStyle='#161616';g.fillRect(-2.2,0,4.4,9);g.restore();g.save();g.translate(1,1.5);g.rotate(1.3);g.fillStyle='#2a2a2a';g.fillRect(-2,0,4,6);g.restore()}
+   else if(ak47Img.complete)g.drawImage(ak47Img,-.5,-9,40,15);
    g.restore()}}
  for(const b of bl){g.save();g.translate(b.x,b.y);g.rotate(Math.atan2(b.vy,b.vx));g.fillStyle='#ffe066';g.beginPath();g.ellipse(0,0,4,1.4,0,0,7);g.fill();g.restore()}
  if(swing>0){const p=1-swing/DUR,sx=boat.x+12,sy=boat.y-5;let o;if(p<.3)o=.9-2.8*Math.sin(p/.3*Math.PI/2);else if(p<.5)o=-1.9+2.6*Math.pow((p-.3)/.2,2);else if(p<.75)o=.7+.3*Math.sin((p-.5)/.25*Math.PI/2);else o=1-.1*(p-.75)/.25;beltAt(sx,sy,sdir+o,64);
