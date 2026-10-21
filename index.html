@@ -232,7 +232,7 @@ function awardCoins(amount){
 const SHOP_TRACKS=[
  {key:'weapon',name:'Зброя',icon:ICON_GUN,levels:WEAPON_LEVELS,desc:n=>(WEAPON_LEVELS[n].type==='pistol'?'Пістолет':'Автомат')+', радіус '+WEAPON_LEVELS[n].range+'px, кулдаун '+WEAPON_LEVELS[n].cd+'с'},
  {key:'motor',name:'Мотор',icon:ICON_MOTOR,levels:MOTOR_LEVELS,desc:n=>'Швидкість ×'+MOTOR_LEVELS[n].speedMul.toFixed(2)+', розрізання '+MOTOR_LEVELS[n].cutTime.toFixed(2)+'с'},
- {key:'belt',name:'Ремінь',icon:ICON_BELT,levels:BELT_LEVELS,desc:n=>'Замах '+BELT_LEVELS[n].dur.toFixed(2)+'с, радіус '+BELT_LEVELS[n].radius+'px'}
+ {key:'belt',name:'Весло',icon:ICON_BELT,levels:BELT_LEVELS,desc:n=>'Замах '+BELT_LEVELS[n].dur.toFixed(2)+'с, радіус '+BELT_LEVELS[n].radius+'px'}
 ];
 function renderShop(){
  document.getElementById('shopCoins').innerHTML='Монети: '+totalCoins;
