@@ -101,6 +101,7 @@ button.avatar{cursor:pointer}
 </div></div>
 <script>
 const IS_DEV=location.hostname==='localhost'||location.hostname==='127.0.0.1';
+const DEV_TOOLS=IS_DEV||/^(192\.168|10\.\d+|172\.(1[6-9]|2\d|3[01]))\.\d+\.\d+$|\.local$/.test(location.hostname);
 const AUTH_ENDPOINT=IS_DEV?'http://localhost:8787':'https://richkovyi-patrul-auth.uaborderguadrsim.workers.dev';
 firebase.initializeApp({apiKey:"AIzaSyBdRUUkz-vorOL2XFxCDrm-J0XxhisNBN4",authDomain:"richkovyi-patrul.firebaseapp.com",projectId:"richkovyi-patrul",storageBucket:"richkovyi-patrul.firebasestorage.app",messagingSenderId:"630820947749",appId:"1:630820947749:web:15c57a8da4bdeb11867ccc"});
 const db=firebase.firestore();
@@ -465,12 +466,12 @@ document.getElementById('lbMe').addEventListener('click',e=>{
  if(e.target.closest('.editBtn'))startNameEdit(e.target.closest('.left'));
 });
 initCloudProgress();
-if(IS_DEV){
+if(DEV_TOOLS){
  const devBtn=document.getElementById('devCoinsBtn');
  devBtn.style.display='inline-block';
  devBtn.onclick=()=>{totalCoins+=5000;if(cloudReady&&cloudUid)awardCoins(5000)};
 }
-let ac=null,mg,nb,mo={},sndOn=!IS_DEV,vcOn=false,pd=0,cut=false,vk=0,vph=0,vo=null,pistolShotBuf=null,rifleShotBuf=null,reloadBuf=null;
+let ac=null,mg,nb,mo={},sndOn=!DEV_TOOLS,vcOn=false,pd=0,cut=false,vk=0,vph=0,vo=null,pistolShotBuf=null,rifleShotBuf=null,reloadBuf=null;
 function initAudio(){if(ac)return;try{ac=new(window.AudioContext||window.webkitAudioContext)()}catch(e){return}mg=ac.createGain();mg.gain.value=sndOn?.8:0;const cp=ac.createDynamicsCompressor();mg.connect(cp);cp.connect(ac.destination);nb=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;fetch('data:audio/mp3;base64,'+PISTOL_SHOT_B64).then(r=>r.arrayBuffer()).then(b=>ac.decodeAudioData(b)).then(b=>{pistolShotBuf=b}).catch(()=>{});fetch('data:audio/mp3;base64,'+RIFLE_SHOT_B64).then(r=>r.arrayBuffer()).then(b=>ac.decodeAudioData(b)).then(b=>{rifleShotBuf=b}).catch(()=>{});fetch('data:audio/mp3;base64,'+RELOAD_B64).then(r=>r.arrayBuffer()).then(b=>ac.decodeAudioData(b)).then(b=>{reloadBuf=b}).catch(()=>{});
  const ws=ac.createBufferSource();ws.buffer=nb;ws.loop=true;const wf=ac.createBiquadFilter();wf.type='lowpass';wf.frequency.value=700;const wg=ac.createGain();wg.gain.value=.07;ws.connect(wf);wf.connect(wg);wg.connect(mg);ws.start();const lf=ac.createOscillator();lf.frequency.value=.25;const lg=ac.createGain();lg.gain.value=.03;lf.connect(lg);lg.connect(wg.gain);lf.start();
  const o1=ac.createOscillator();o1.type='sawtooth';o1.frequency.value=48;const o2=ac.createOscillator();o2.type='square';o2.frequency.value=24;const mf=ac.createBiquadFilter();mf.type='lowpass';mf.frequency.value=380;const mgn=ac.createGain();mgn.gain.value=.035;o1.connect(mf);o2.connect(mf);mf.connect(mgn);mgn.connect(mg);o1.start();o2.start();const tl=ac.createOscillator();tl.frequency.value=14;const tg=ac.createGain();tg.gain.value=.012;tl.connect(tg);tg.connect(mgn.gain);tl.start();mo={o1,o2,mgn,mf,tl,tg}}
