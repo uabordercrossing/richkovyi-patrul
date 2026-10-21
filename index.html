@@ -533,7 +533,10 @@ function draw(){
   g.fillStyle='#3f5e2c';g.beginPath();g.ellipse(x,y-21,10,4.5,0,0,7);g.fill();g.fillRect(x-7,y-21,14,5);
   g.fillStyle='#2b4421';g.fillRect(x-7,y-19,14,3);g.fillStyle='#1a1a1a';g.fillRect(x-8,y-16.3,16,1.8);
   g.fillStyle='#ffd54a';g.beginPath();g.arc(x,y-17.5,1.5,0,7);g.fill();
-  if(o===-12&&upgrades.weapon>0){const wl=WEAPON_LEVELS[upgrades.weapon];g.strokeStyle='#2a2a2a';g.lineCap='round';if(wl.type==='pistol'){g.lineWidth=3;g.beginPath();g.moveTo(x-8,y-2);g.lineTo(x-16,y-2);g.stroke()}else{g.lineWidth=4;g.beginPath();g.moveTo(x-8,y-3);g.lineTo(x-20,y-5);g.stroke();g.fillStyle='#4a4a4a';g.fillRect(x-16,y-3,4,6)}}}
+  if(o===-12&&upgrades.weapon>0){const wl=WEAPON_LEVELS[upgrades.weapon];g.save();g.translate(x-6,y-1);
+   if(wl.type==='pistol'){g.fillStyle='#2a2a2a';g.fillRect(0,-2.5,10,4);g.fillRect(6,-2.5,3,2);g.save();g.translate(2,1.5);g.rotate(1.3);g.fillStyle='#1c1c1c';g.fillRect(-2,0,4,7);g.restore()}
+   else{g.fillStyle='#2f2f2f';g.fillRect(-7,-2.5,22,4);g.fillStyle='#6a4a28';g.fillRect(-11,-2,5,3.5);g.save();g.translate(11,1.5);g.rotate(.55);g.fillStyle='#161616';g.fillRect(-2.2,0,4.4,9);g.restore();g.save();g.translate(1,1.5);g.rotate(1.3);g.fillStyle='#2a2a2a';g.fillRect(-2,0,4,6);g.restore()}
+   g.restore()}}
  for(const b of bl){g.save();g.translate(b.x,b.y);g.rotate(Math.atan2(b.vy,b.vx));g.fillStyle='#ffe066';g.beginPath();g.ellipse(0,0,4,1.4,0,0,7);g.fill();g.restore()}
  if(swing>0){const p=1-swing/DUR,sx=boat.x+12,sy=boat.y-5;let o;if(p<.3)o=.9-2.8*Math.sin(p/.3*Math.PI/2);else if(p<.5)o=-1.9+2.6*Math.pow((p-.3)/.2,2);else if(p<.75)o=.7+.3*Math.sin((p-.5)/.25*Math.PI/2);else o=1-.1*(p-.75)/.25;beltAt(sx,sy,sdir+o,64);
   if(p>.3&&p<.65){g.strokeStyle='rgba(255,255,255,'+Math.max(0,.55*(1-Math.abs(p-.45)/.2))+')';g.lineWidth=3;g.beginPath();g.arc(sx,sy,56,sdir+Math.max(-1.9,o-1.1),sdir+o);g.stroke()}}else beltAt(boat.x+12,boat.y-5,-1.0,40);
