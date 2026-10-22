@@ -194,48 +194,48 @@ pistolImg.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(PISTOL_SVG)
 let upgrades={weapon:0,motor:0,belt:0,ammo:0,reload:0};
 let maxAmmo=5,reloadTime=3.5;
 const WEAPON_LEVELS=[null,
- {type:'pistol',cd:1.8,range:90,cost:3000},
- {type:'pistol',cd:1.4,range:100,cost:4500},
- {type:'pistol',cd:1.0,range:110,cost:6000},
- {type:'pistol',cd:.5,range:130,cost:7500},
- {type:'rifle',cd:.3,range:150,cost:9000},
- {type:'rifle',cd:.26,range:155,cost:10500},
- {type:'rifle',cd:.22,range:160,cost:12000},
- {type:'rifle',cd:.18,range:165,cost:13500},
- {type:'rifle',cd:.14,range:170,cost:15000},
- {type:'rifle',cd:.1,range:175,cost:16500}
+ {type:'pistol',cd:1.8,range:90,cost:1500},
+ {type:'pistol',cd:1.4,range:100,cost:2250},
+ {type:'pistol',cd:1.0,range:110,cost:3000},
+ {type:'pistol',cd:.5,range:130,cost:3750},
+ {type:'rifle',cd:.3,range:150,cost:4500},
+ {type:'rifle',cd:.26,range:155,cost:5250},
+ {type:'rifle',cd:.22,range:160,cost:6000},
+ {type:'rifle',cd:.18,range:165,cost:6750},
+ {type:'rifle',cd:.14,range:170,cost:7500},
+ {type:'rifle',cd:.1,range:175,cost:8250}
 ];
 const MOTOR_LEVELS=[
  {speedMul:1,cutTime:.35,cost:0},
- {speedMul:1.12,cutTime:.31,cost:1000},
- {speedMul:1.24,cutTime:.27,cost:1500},
- {speedMul:1.36,cutTime:.23,cost:2000},
- {speedMul:1.48,cutTime:.19,cost:2500},
- {speedMul:1.60,cutTime:.15,cost:3000}
+ {speedMul:1.12,cutTime:.31,cost:500},
+ {speedMul:1.24,cutTime:.27,cost:750},
+ {speedMul:1.36,cutTime:.23,cost:1000},
+ {speedMul:1.48,cutTime:.19,cost:1250},
+ {speedMul:1.60,cutTime:.15,cost:1500}
 ];
 const BELT_LEVELS=[
  {dur:.40,radius:52,cost:0},
- {dur:.368,radius:57,cost:1000},
- {dur:.336,radius:62,cost:1500},
- {dur:.304,radius:66,cost:2000},
- {dur:.272,radius:71,cost:2500},
- {dur:.24,radius:76,cost:3000}
+ {dur:.368,radius:57,cost:500},
+ {dur:.336,radius:62,cost:750},
+ {dur:.304,radius:66,cost:1000},
+ {dur:.272,radius:71,cost:1250},
+ {dur:.24,radius:76,cost:1500}
 ];
 const AMMO_LEVELS=[
  {capacity:5,cost:0},
- {capacity:7,cost:2000},
- {capacity:9,cost:3000},
- {capacity:12,cost:4000},
- {capacity:16,cost:5000},
- {capacity:20,cost:6000}
+ {capacity:7,cost:1000},
+ {capacity:9,cost:1500},
+ {capacity:12,cost:2000},
+ {capacity:16,cost:2500},
+ {capacity:20,cost:3000}
 ];
 const RELOAD_LEVELS=[
  {time:3.5,cost:0},
- {time:3.2,cost:2000},
- {time:2.9,cost:3000},
- {time:2.6,cost:4000},
- {time:2.3,cost:5000},
- {time:2.0,cost:6000}
+ {time:3.2,cost:1000},
+ {time:2.9,cost:1500},
+ {time:2.6,cost:2000},
+ {time:2.3,cost:2500},
+ {time:2.0,cost:3000}
 ];
 let DUR=.4,BELT_RADIUS=52,BOAT_SPEED=240,CUT_TIME=.35;
 function applyUpgrades(){
