@@ -28,11 +28,11 @@ Volume is 30% (`.3`), reload sample is timed so its end lines up with the end of
 
 To restore: put the `sfx.shot` / `sfx.reload` lines above back into the `const sfx={...}` object in `index.html`.
 
-## "Game" sounds (synthesized/arcade) — in use since 2026-10-22
+## "Game" sounds (synthesized/arcade) — in use since 2026-10-22, ✅ confirmed by user
 
 Procedurally synthesized using the existing Web Audio `nz()` (filtered noise burst) and `tn()` (tone) helpers — no sample files involved.
 
-First pass (commit `abed4ed`) reused the old toy-blip version from commit `e0f22f0` (square/triangle oscillator beeps) — sounded too cartoonish. Replaced same day with a noise-based version meant to read as an actual gunshot:
+First pass (commit `abed4ed`) reused the old toy-blip version from commit `e0f22f0` (square/triangle oscillator beeps) — sounded too cartoonish. Replaced same day with a noise-based version (commit `31cbe9a`) meant to read as an actual gunshot — **user confirmed this noise-based version sounds good ("заебись")**. This is the reference version to restore if asked to bring back "game"/"arcade" sounds in the future:
 
 ```js
 shot:(big)=>{const k=.95+Math.random()*.1;if(big){nz('bandpass',2000*k,650*k,.035,.5,.9);nz('lowpass',950*k,140*k,.1,.55,.5);tn('sine',140*k,45*k,.11,.3)}else{nz('highpass',3400*k,1100*k,.03,.55,.8);nz('bandpass',1400*k,350*k,.08,.42,1.3);tn('sine',190*k,55*k,.1,.26)}},
