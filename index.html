@@ -184,8 +184,8 @@ const PISTOL_SVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" 
 </svg>`;
 const pistolImg=new Image();
 pistolImg.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(PISTOL_SVG);
-let upgrades={weapon:0,motor:0,belt:0,ammo:0};
-let maxAmmo=5;
+let upgrades={weapon:0,motor:0,belt:0,ammo:0,reload:0};
+let maxAmmo=5,reloadTime=3.5;
 const WEAPON_LEVELS=[null,
  {type:'pistol',cd:1.8,range:90,cost:3000},
  {type:'pistol',cd:1.4,range:100,cost:4500},
@@ -217,6 +217,14 @@ const AMMO_LEVELS=[
  {capacity:16,cost:550},
  {capacity:20,cost:900}
 ];
+const RELOAD_LEVELS=[
+ {time:3.5,cost:0},
+ {time:3.2,cost:2000},
+ {time:2.9,cost:3000},
+ {time:2.6,cost:4000},
+ {time:2.3,cost:5000},
+ {time:2.0,cost:6000}
+];
 let DUR=.4,BELT_RADIUS=52,BOAT_SPEED=240,CUT_TIME=.35;
 function applyUpgrades(){
  DUR=BELT_LEVELS[upgrades.belt].dur;
@@ -224,6 +232,7 @@ function applyUpgrades(){
  BOAT_SPEED=240*MOTOR_LEVELS[upgrades.motor].speedMul;
  CUT_TIME=MOTOR_LEVELS[upgrades.motor].cutTime;
  maxAmmo=AMMO_LEVELS[upgrades.ammo].capacity;
+ reloadTime=RELOAD_LEVELS[upgrades.reload].time;
 }
 applyUpgrades();
 const ICON_SPEAKER_ON='<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor"/><path d="M16.3 8.6a5 5 0 0 1 0 6.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/><path d="M18.6 6.1a8.2 8.2 0 0 1 0 11.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>';
@@ -238,6 +247,7 @@ const ICON_GUN='<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><pat
 const ICON_MOTOR='<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 10h9l4 3v3H4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 11.5h3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const ICON_BELT='<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="10" width="18" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="10" y="8.5" width="4" height="7" rx="1" fill="currentColor"/></svg>';
 const ICON_MAG='<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="3" width="8" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="10" y="6" width="4" height="2.4" fill="currentColor"/><rect x="10" y="9.4" width="4" height="2.4" fill="currentColor"/><path d="M9 15l1 6h4l1-6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+const ICON_RELOAD='<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 12a7 7 0 1 1-2.1-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M19.5 3.5v4.5H15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 function medalSvg(place){
  const c={1:['#f7d44c','#a9791c'],2:['#dde2e8','#8e97a1'],3:['#d9975c','#8a5a30']}[place];
  return `<svg viewBox="0 0 28 34" xmlns="http://www.w3.org/2000/svg"><path d="M9 13L3 31l11-6 11 6-6-18" fill="${c[1]}"/><circle cx="14" cy="13" r="11" fill="${c[0]}" stroke="${c[1]}" stroke-width="2"/><text x="14" y="17.5" font-size="11" text-anchor="middle" font-family="system-ui" font-weight="700" fill="${c[1]}">${place}</text></svg>`;
@@ -293,7 +303,7 @@ async function initCloudProgress(){
    if(typeof data.coins==='number')totalCoins=data.coins;
    cloudDisplayName=data.displayName||'';
    cloudAvatar=data.avatar||'soldier_cap';
-   if(data.upgrades)upgrades={weapon:data.upgrades.weapon||0,motor:data.upgrades.motor||0,belt:data.upgrades.belt||0,ammo:data.upgrades.ammo||0};
+   if(data.upgrades)upgrades={weapon:data.upgrades.weapon||0,motor:data.upgrades.motor||0,belt:data.upgrades.belt||0,ammo:data.upgrades.ammo||0,reload:data.upgrades.reload||0};
   }
   applyUpgrades();
   docRef.set({firstName,lastName},{merge:true}).catch(()=>{});
@@ -317,7 +327,8 @@ const SHOP_TRACKS=[
  {key:'weapon',name:'Зброя',icon:ICON_GUN,levels:WEAPON_LEVELS,desc:n=>(WEAPON_LEVELS[n].type==='pistol'?'Пістолет':'Автомат')+', радіус '+WEAPON_LEVELS[n].range+'px, кулдаун '+WEAPON_LEVELS[n].cd+'с'},
  {key:'motor',name:'Мотор',icon:ICON_MOTOR,levels:MOTOR_LEVELS,desc:n=>'Швидкість ×'+MOTOR_LEVELS[n].speedMul.toFixed(2)+', розрізання '+MOTOR_LEVELS[n].cutTime.toFixed(2)+'с'},
  {key:'belt',name:'Весло',icon:ICON_BELT,levels:BELT_LEVELS,desc:n=>'Замах '+BELT_LEVELS[n].dur.toFixed(2)+'с, радіус '+BELT_LEVELS[n].radius+'px'},
- {key:'ammo',parent:'weapon',name:'Магазин',icon:ICON_MAG,levels:AMMO_LEVELS,desc:n=>'Магазин на '+AMMO_LEVELS[n].capacity+' патронів',lockedIf:()=>upgrades.weapon===0,lockedMsg:'Спочатку купіть зброю'}
+ {key:'ammo',parent:'weapon',name:'Магазин',icon:ICON_MAG,levels:AMMO_LEVELS,desc:n=>'Магазин на '+AMMO_LEVELS[n].capacity+' патронів',lockedIf:()=>upgrades.weapon===0,lockedMsg:'Спочатку купіть зброю'},
+ {key:'reload',parent:'weapon',name:'Перезарядка',icon:ICON_RELOAD,levels:RELOAD_LEVELS,desc:n=>'Перезарядка '+RELOAD_LEVELS[n].time.toFixed(1)+'с',lockedIf:()=>upgrades.weapon===0,lockedMsg:'Спочатку купіть зброю'}
 ];
 function shopRow(tr){
  const locked=!!(tr.lockedIf&&tr.lockedIf());
@@ -488,9 +499,9 @@ if(DEV_TOOLS){
  resetBtn.style.display='inline-block';
  resetBtn.onclick=()=>{
   if(!confirm('Скинути весь прогрес: монети, апгрейди та рекорд?'))return;
-  totalCoins=0;best=0;upgrades={weapon:0,motor:0,belt:0,ammo:0};applyUpgrades();
+  totalCoins=0;best=0;upgrades={weapon:0,motor:0,belt:0,ammo:0,reload:0};applyUpgrades();
   ammo=maxAmmo;reloading=false;reloadT=0;needsReload=false;burstN=0;
-  if(IS_DEV&&cloudReady&&cloudUid)db.collection('progress').doc(cloudUid).set({coins:0,best:0,upgrades:{weapon:0,motor:0,belt:0,ammo:0}},{merge:true}).catch(()=>{});
+  if(IS_DEV&&cloudReady&&cloudUid)db.collection('progress').doc(cloudUid).set({coins:0,best:0,upgrades:{weapon:0,motor:0,belt:0,ammo:0,reload:0}},{merge:true}).catch(()=>{});
  };
 }
 let ac=null,mg,nb,mo={},sndOn=!DEV_TOOLS,vcOn=false,pd=0,cut=false,vk=0,vph=0,vo=null;
@@ -552,7 +563,6 @@ if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.onEvent)windo
 const CATCH_PHRASES=['Стояти!','Назад!','Куди зібрався?','Попався!','Кордон на замку!','Ану тримай!','Не пройдеш!','Разом до перемоги!','Куди ми так поспішаємо?','Твій маршрут змінено!','Незламність відновлено!','Фортеця під захистом, а ти — ні!','Перевірка документів!','Куди без повістки?!','Прийшов час оновити дані!','Доброго вечора, ми з ДПСУ!','Аквамен, здавайся!','Куди пливемо?','Анульовано!','Де документи?'];
 let sdone=true,sdir=-Math.PI/2,stg=null;function motorCatch(s){s.st='done';score++;sfx.pull();for(let k=0;k<3;k++)rp.push({x:s.x,y:s.y,r:4,t:1.1,d:k*.18});for(let k=0;k<12;k++)bb.push({x:s.x+(Math.random()-.5)*22,y:s.y+(Math.random()-.5)*10,r:1.5+Math.random()*3,vy:-(15+Math.random()*25),t:.9+Math.random()*.8,ph:Math.random()*6});fx.push({x:boat.x+(Math.random()-.5)*30,y:boat.y-14,t:.9,s:CATCH_PHRASES[Math.random()*CATCH_PHRASES.length|0]});return true}function splash(x,y){sfx.whack();sp.push({x,y,t:0,L:.7});for(let k=0;k<16;k++)dr.push({x:x+(Math.random()-.5)*8,y:y-8,vx:(Math.random()-.5)*80,vy:-(70+Math.random()*80),life:.5+Math.random()*.4})}function aim(){let b=null,bd=BELT_RADIUS;for(const s of sw)if(s.st==='swim'){const d=Math.hypot(s.x-boat.x,s.y-boat.y);if(d<bd){bd=d;b=s}}stg=b;return b?Math.atan2(b.y-boat.y,b.x-boat.x):-Math.PI/2}
 let boat,sw,fx,rp=[],bb=[],sp=[],dr=[],stn=[],score,esc,t,spawn,swing,cd,over,best=0,totalCoins=0,tx,ty,bl=[],wcd=0,burstN=0,burstT=0,burstTgt=null,ammo=5,reloading=false,reloadT=0,needsReload=false;
-const RELOAD_TIME={pistol:1.1,rifle:1.5};
 function reset(){boat={x:180,y:300};tx=180;ty=300;sw=[];fx=[];rp=[];bb=[];sp=[];dr=[];stn=[];bl=[];score=0;esc=0;t=0;spawn=0;swing=0;cd=0;wcd=0;burstN=0;burstT=0;burstTgt=null;ammo=maxAmmo;reloading=false;reloadT=0;needsReload=false;over=false;updateLbBtn()}
 reset();
 function pos(e){const r=c.getBoundingClientRect();return[(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*H/r.height]}
@@ -572,7 +582,7 @@ function upd(d){if(!started){t+=d;return}t+=d;cd-=d;swing-=d;if(swing>0&&!sdone&
   else if(s.st==='back'){s.y+=130*d;if(s.y>BOT+15)s.st='done'}else if(s.st==='land'){s.y-=75*d;s.x+=Math.sin(t*3+s.ph)*4*d;if(s.y<=s.ty){s.st='cheer';sfx.cheer()}}else if(s.st==='cheer'){s.c+=d;if(s.say===0||(s.say===1&&s.c>1.1)){s.say++;fx.push({x:Math.min(W-55,Math.max(55,s.x)),y:s.y-24,t:.9,s:CH[Math.random()*CH.length|0]})}if(s.c>2.6)s.st='exit'}else if(s.st==='exit'){s.y-=80*d;if(s.y<-25)s.st='done'}}
  sw=sw.filter(s=>s.st!=='done');fx.forEach(f=>f.t-=d);fx=fx.filter(f=>f.t>0);rp.forEach(q=>{if(q.d>0)q.d-=d;else{q.r+=48*d;q.t-=d}});rp=rp.filter(q=>q.t>0);bb.forEach(b=>{b.y+=b.vy*d;b.x+=Math.sin(t*8+b.ph)*10*d;b.t-=d});bb=bb.filter(b=>b.t>0);cut=false;vk=0;for(const s of sw)if(s.st==='swim'){if(Math.hypot(s.x-(boat.x-40),s.y-boat.y)<24){cut=true;s.mt=(s.mt||0)+d;s.ct=(s.ct||0)+d;if(s.ct/1.3>vk){vk=s.ct/1.3;vph=s.ph}if(s.jar===0){s.tk=(s.tk||0)-d;if(s.tk<=0){s.tk=.22;stn.push({x:s.x+(Math.random()-.5)*6,y:s.y+4,t:2,m:1,bits:[{a:Math.random()*6.28,d:5,r:1.4}]})}}if(s.mt>=1.3&&motorCatch(s))continue}else{s.mt=Math.max(0,(s.mt||0)-d*.6);s.ct=0}}
  for(const s of sw)if(s.st==='swim'&&s.jar){if(Math.hypot(s.x-(boat.x-40),s.y-boat.y)<24){s.cutT=(s.cutT||0)+d;if(s.cutT>=CUT_TIME){s.jar=0;sfx.glass();stn.push({x:s.x,y:s.y,t:0,bits:Array.from({length:4},()=>({a:Math.random()*6.28,d:6+Math.random()*10,r:1.2+Math.random()*1.6}))});fx.push({x:s.x,y:s.y-10,t:.9,s:'Слава Україні!'});for(let k=0;k<2;k++)rp.push({x:s.x,y:s.y,r:3,t:.9,d:k*.15})}}else s.cutT=0}
- if(burstN>0){burstT-=d;if(burstT<=0){const wl=WEAPON_LEVELS[upgrades.weapon];if(burstTgt){const gx=boat.x-(wl.type==='rifle'?37:21),gy=(boat.y0||boat.y)-2,jit=(Math.random()-.5)*.12,ang=Math.atan2(burstTgt.y-gy,burstTgt.x-gx)+jit,dist=Math.hypot(burstTgt.x-gx,burstTgt.y-gy),spd=Math.max(80,dist/.12);bl.push({x:gx,y:gy,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,target:burstTgt,life:.6});sfx.shot(wl.type==='rifle')}burstN--;burstT=.08;if(burstN<=0&&needsReload){reloading=true;reloadT=RELOAD_TIME[wl.type];needsReload=false;sfx.reload(reloadT)}}}
+ if(burstN>0){burstT-=d;if(burstT<=0){const wl=WEAPON_LEVELS[upgrades.weapon];if(burstTgt){const gx=boat.x-(wl.type==='rifle'?37:21),gy=(boat.y0||boat.y)-2,jit=(Math.random()-.5)*.12,ang=Math.atan2(burstTgt.y-gy,burstTgt.x-gx)+jit,dist=Math.hypot(burstTgt.x-gx,burstTgt.y-gy),spd=Math.max(80,dist/.12);bl.push({x:gx,y:gy,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,target:burstTgt,life:.6});sfx.shot(wl.type==='rifle')}burstN--;burstT=.08;if(burstN<=0&&needsReload){reloading=true;reloadT=reloadTime;needsReload=false;sfx.reload(reloadT)}}}
  else if(reloading){reloadT-=d;if(reloadT<=0){reloading=false;ammo=maxAmmo}}
  else{wcd-=d;if(upgrades.weapon>0&&wcd<=0&&ammo>0){const wl=WEAPON_LEVELS[upgrades.weapon],gx=boat.x-12,gy=(boat.y0||boat.y)-2;let tgt=null,bd=wl.range;for(const s of sw)if(s.st==='swim'){const dd=Math.hypot(s.x-gx,s.y-gy);if(dd<bd){bd=dd;tgt=s}}if(tgt){wcd=wl.cd;burstTgt=tgt;burstN=wl.type==='rifle'?3+(Math.random()*3|0):1;burstT=0;ammo--;if(ammo<=0)needsReload=true}}}
  for(const b of bl){b.x+=b.vx*d;b.y+=b.vy*d;b.life-=d;if(!b.hit&&b.target&&b.target.st==='swim'&&Math.hypot(b.x-b.target.x,b.y-b.target.y)<10){b.hit=true;if(b.target.jar){sfx.glass();stn.push({x:b.target.x,y:b.target.y,t:0,bits:Array.from({length:2},()=>({a:Math.random()*6.28,d:5+Math.random()*6,r:1+Math.random()*1.3}))});for(let k=0;k<4;k++)bb.push({x:b.target.x+(Math.random()-.5)*14,y:b.target.y+Math.random()*4,r:1+Math.random()*2,vy:-(10+Math.random()*16),t:.5+Math.random()*.4,ph:Math.random()*6})}motorCatch(b.target)}}
@@ -625,7 +635,7 @@ function draw(){
   const barX=hx+iw+6,barY=hy+1,barW=60,barH=9;
   g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.roundRect(barX,barY,barW,barH,3);g.fill();
   if(reloading){
-   const p=Math.max(0,Math.min(1,1-reloadT/RELOAD_TIME[wl.type]));
+   const p=Math.max(0,Math.min(1,1-reloadT/reloadTime));
    g.fillStyle='rgba(255,170,60,.9)';g.beginPath();g.roundRect(barX,barY,barW*p,barH,3);g.fill();
   }else{
    g.fillStyle='rgba(255,213,74,.95)';g.beginPath();g.roundRect(barX,barY,barW*ammo/maxAmmo,barH,3);g.fill();
