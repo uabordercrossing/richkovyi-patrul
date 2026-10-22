@@ -6,7 +6,8 @@
 :root{--bg:#f4f1ea;--fg:#222;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1d21;--fg:#eee}}
 :root[data-theme="dark"]{--bg:#1b1d21;--fg:#eee}
-html,body{height:100%;margin:0;overflow:hidden}
+html,body{height:100%;margin:0;overflow:hidden;overscroll-behavior:none}
+body{position:fixed;inset:0;width:100%}
 body{background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center}
 p{margin:6px;font-size:13px;opacity:.7}
 #bar{display:flex;gap:8px;margin:10px 0 14px}button{font-size:18px;padding:3px 10px;border-radius:8px;border:1px solid #8886;background:transparent;color:var(--fg);font-family:inherit}
@@ -543,6 +544,14 @@ sndBtn.onclick=()=>{initAudio();sndOn=!sndOn;if(mg)mg.gain.value=sndOn?.8:0;sndB
 const c=document.getElementById('c'),g=c.getContext('2d');
 const W=360,H=560,TOP=120,BOT=440,FY=BOT+52;
 const stage=document.getElementById('stage');
+(function initTelegramViewport(){
+ const tg=window.Telegram&&window.Telegram.WebApp;
+ if(!tg)return;
+ try{tg.ready()}catch(e){}
+ try{tg.expand()}catch(e){}
+ // iOS treats vertical drags on the canvas as dragging/closing the sheet
+ try{if(tg.disableVerticalSwipes)tg.disableVerticalSwipes()}catch(e){}
+})();
 const DPR=Math.min(window.devicePixelRatio||1,2);
 c.width=W*DPR;c.height=H*DPR;
 g.setTransform(DPR,0,0,DPR,0,0);
