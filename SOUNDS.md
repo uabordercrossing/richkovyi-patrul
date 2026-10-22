@@ -28,16 +28,20 @@ Volume is 30% (`.3`), reload sample is timed so its end lines up with the end of
 
 To restore: put the `sfx.shot` / `sfx.reload` lines above back into the `const sfx={...}` object in `index.html`.
 
-## "Game" sounds (synthesized/arcade) — switched to on 2026-10-22
+## "Game" sounds (synthesized/arcade) — in use since 2026-10-22
 
-Procedurally synthesized toy-style blips using the existing Web Audio `tn()` (tone) helper — no sample files involved. Originally introduced in commit `e0f22f0` ("Replace real gunshot and reload samples with synthesized toy sounds"), later reverted; restored again now.
+Procedurally synthesized using the existing Web Audio `nz()` (filtered noise burst) and `tn()` (tone) helpers — no sample files involved.
+
+First pass (commit `abed4ed`) reused the old toy-blip version from commit `e0f22f0` (square/triangle oscillator beeps) — sounded too cartoonish. Replaced same day with a noise-based version meant to read as an actual gunshot:
 
 ```js
-shot:(big)=>{const k=.94+Math.random()*.12;if(big){tn('square',1500*k,400,.06,.07);tn('triangle',700*k,200,.06,.14)}else{tn('square',1100*k,260,.11,.09);tn('sine',500*k,120,.08,.18)}},
+shot:(big)=>{const k=.95+Math.random()*.1;if(big){nz('bandpass',2000*k,650*k,.035,.5,.9);nz('lowpass',950*k,140*k,.1,.55,.5);tn('sine',140*k,45*k,.11,.3)}else{nz('highpass',3400*k,1100*k,.03,.55,.8);nz('bandpass',1400*k,350*k,.08,.42,1.3);tn('sine',190*k,55*k,.1,.26)}},
 reload:(total)=>{const b=Math.max(0,total-.68);tn('square',700,350,.05,.07,b);tn('square',560,280,.05,.07,b+.22);tn('triangle',520,1040,.22,.12,b+.46)}
 ```
 
-- `shot`: rifle (`big`) is a higher-pitched square+triangle blip; pistol is a lower-pitched square+sine blip, with slight random pitch jitter each time.
-- `reload`: three short blips timed against the end of the reload bar (`total` = reload duration in seconds).
+- `shot`: each call layers a short filtered-noise "crack" + a filtered-noise "body" + a low sine "thump", with a small random pitch jitter `k` per shot.
+  - Pistol (`!big`): higher/brighter crack (`highpass` 3400→1100 Hz) and body, shorter — meant to read as a sharper pop.
+  - Rifle (`big`, fired in bursts every ~0.08s): duller/lower crack (`bandpass` 2000→650 Hz) and a bigger `lowpass`-filtered low-end body — meant to sound more muffled/percussive ("хлёсткий") so a burst reads as automatic fire rather than a toy beep.
+- `reload`: unchanged — three short square/triangle blips timed against the end of the reload bar (`total` = reload duration in seconds).
 
 The `sounds/pistol-shot.mp3`, `sounds/rifle-shot.mp3`, `sounds/reload.mp3` files and their `loadSample` calls are left in place (unused while game sounds are active) so switching back to real sounds is a one-line swap.
