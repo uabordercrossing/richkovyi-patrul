@@ -3,7 +3,7 @@
 The game can use two different sets of sounds for pistol shot, rifle shot, and reload.
 Headshot sound is not part of this switch — it always uses `sounds/headshot.mp3`.
 
-## "Real" sounds (recorded samples) — in use before 2026-10-22
+## "Real" sounds (recorded samples) — in use since 2026-10-22
 
 Realistic sampled audio loaded from files in [sounds/](sounds/):
 
@@ -28,7 +28,7 @@ Volume is 30% (`.3`), reload sample is timed so its end lines up with the end of
 
 To restore: put the `sfx.shot` / `sfx.reload` lines above back into the `const sfx={...}` object in `index.html`.
 
-## "Game" sounds (synthesized/arcade) — in use since 2026-10-22, ✅ confirmed by user
+## "Game" sounds (synthesized/arcade) — ✅ confirmed by user, not currently active
 
 Procedurally synthesized using the existing Web Audio `nz()` (filtered noise burst) and `tn()` (tone) helpers — no sample files involved.
 
