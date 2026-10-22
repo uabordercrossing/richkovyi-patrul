@@ -83,7 +83,7 @@ button.avatar{cursor:pointer}
  <canvas id="c" width="360" height="560"></canvas>
  <button id="lbBtn"></button>
 </div>
-<div id="bar"><button id="snd" class="iconBtn"></button><button id="devCoinsBtn" class="devBtn" style="display:none">+5000 монет (тест)</button><button id="shopBtn" class="devBtn"></button></div>
+<div id="bar"><button id="snd" class="iconBtn"></button><button id="devCoinsBtn" class="devBtn" style="display:none">+5000 монет (тест)</button><button id="devResetBtn" class="devBtn" style="display:none">Скинути прогрес (тест)</button><button id="shopBtn" class="devBtn"></button></div>
 <div id="lbModal"><div class="card">
  <div class="lbHead"><h2>Таблиця лідерів</h2><button id="lbClose" class="closeX"></button></div>
  <div id="lbMe"></div>
@@ -467,6 +467,14 @@ if(DEV_TOOLS){
  const devBtn=document.getElementById('devCoinsBtn');
  devBtn.style.display='inline-block';
  devBtn.onclick=()=>{totalCoins+=5000;if(cloudReady&&cloudUid)awardCoins(5000)};
+ const resetBtn=document.getElementById('devResetBtn');
+ resetBtn.style.display='inline-block';
+ resetBtn.onclick=()=>{
+  if(!confirm('Скинути весь прогрес: монети, апгрейди та рекорд?'))return;
+  totalCoins=0;best=0;upgrades={weapon:0,motor:0,belt:0,ammo:0};applyUpgrades();
+  ammo=maxAmmo;reloading=false;reloadT=0;needsReload=false;burstN=0;
+  if(IS_DEV&&cloudReady&&cloudUid)db.collection('progress').doc(cloudUid).set({coins:0,best:0,upgrades:{weapon:0,motor:0,belt:0,ammo:0}},{merge:true}).catch(()=>{});
+ };
 }
 let ac=null,mg,nb,mo={},sndOn=!DEV_TOOLS,vcOn=false,pd=0,cut=false,vk=0,vph=0,vo=null;
 function initAudio(){if(ac)return;try{ac=new(window.AudioContext||window.webkitAudioContext)()}catch(e){return}mg=ac.createGain();mg.gain.value=sndOn?.8:0;const cp=ac.createDynamicsCompressor();mg.connect(cp);cp.connect(ac.destination);nb=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
