@@ -18,7 +18,9 @@ p{margin:6px;font-size:13px;opacity:.7}
 .closeX{width:18px;height:18px}
 #stage{position:relative;display:block}
 #stage canvas{display:block;width:100%;height:100%;touch-action:none;border-radius:10px}
-#lbBtn{display:none;position:absolute;left:50%;top:66%;transform:translateX(-50%);font-size:14px;padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.5);background:rgba(20,30,20,.55);color:#fff;white-space:nowrap}
+#lbBtn,#shopBtn{display:none;position:absolute;left:50%;transform:translateX(-50%);font-size:14px;padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.5);background:rgba(20,30,20,.55);color:#fff;white-space:nowrap}
+#lbBtn{top:66%}
+#shopBtn{top:78%}
 #lbModal,#avModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);align-items:center;justify-content:center;z-index:10}
 #avModal{z-index:11}
 .card{background:var(--bg);color:var(--fg);width:min(320px,88vw);max-height:80vh;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px}
@@ -61,7 +63,10 @@ button.avatar{cursor:pointer}
 .avCell.selected{border-color:#f2c94c}
 #avClose{align-self:flex-end;font-size:14px}
 .devBtn{font-size:12px;padding:4px 8px}
-#shopBtn{display:none}
+#devMenuWrap{position:relative}
+#devMenu{display:none;position:absolute;top:100%;left:0;margin-top:4px;flex-direction:column;gap:4px;background:var(--bg);border:1px solid #8886;border-radius:8px;padding:5px;z-index:5;min-width:170px;box-shadow:0 6px 16px rgba(0,0,0,.25)}
+#devMenu.open{display:flex}
+#devMenu button{white-space:nowrap;text-align:left;width:100%}
 #shopModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);align-items:center;justify-content:center;z-index:12}
 #shopModal .card{background:linear-gradient(#1c2d4c,#131f36);color:#eef2f8;border:2px solid rgba(255,255,255,.22);box-shadow:0 14px 34px rgba(0,0,0,.5)}
 #shopCoins{font-weight:700;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.15)}
@@ -87,8 +92,9 @@ button.avatar{cursor:pointer}
 <div id="stage">
  <canvas id="c" width="360" height="560"></canvas>
  <button id="lbBtn"></button>
+ <button id="shopBtn"></button>
 </div>
-<div id="bar"><button id="snd" class="iconBtn"></button><button id="devCoinsBtn" class="devBtn" style="display:none">+5000 монет (тест)</button><button id="devResetBtn" class="devBtn" style="display:none">Скинути прогрес (тест)</button><button id="shopBtn" class="devBtn"></button></div>
+<div id="bar"><button id="snd" class="iconBtn"></button><div id="devMenuWrap" style="display:none"><button id="devMenuBtn" class="devBtn">...</button><div id="devMenu"><button id="devCoinsBtn">+5000 монет (тест)</button><button id="devResetBtn">Скинути прогрес (тест)</button></div></div></div>
 <div id="lbModal"><div class="card">
  <div class="lbHead"><h2>Таблиця лідерів</h2><button id="lbClose" class="closeX"></button></div>
  <div id="lbMe"></div>
@@ -502,12 +508,16 @@ document.getElementById('lbMe').addEventListener('click',e=>{
 });
 initCloudProgress();
 if(DEV_TOOLS){
+ const devMenuWrap=document.getElementById('devMenuWrap');
+ const devMenu=document.getElementById('devMenu');
+ devMenuWrap.style.display='inline-flex';
+ document.getElementById('devMenuBtn').onclick=()=>devMenu.classList.toggle('open');
+ document.addEventListener('click',e=>{if(!devMenuWrap.contains(e.target))devMenu.classList.remove('open')});
  const devBtn=document.getElementById('devCoinsBtn');
- devBtn.style.display='inline-block';
- devBtn.onclick=()=>{totalCoins+=5000;if(cloudReady&&cloudUid)awardCoins(5000)};
+ devBtn.onclick=()=>{totalCoins+=5000;if(cloudReady&&cloudUid)awardCoins(5000);devMenu.classList.remove('open')};
  const resetBtn=document.getElementById('devResetBtn');
- resetBtn.style.display='inline-block';
  resetBtn.onclick=()=>{
+  devMenu.classList.remove('open');
   if(!confirm('Скинути весь прогрес: монети, апгрейди та рекорд?'))return;
   totalCoins=0;best=0;upgrades={weapon:0,motor:0,belt:0,ammo:0,reload:0};applyUpgrades();
   ammo=maxAmmo;reloading=false;reloadT=0;needsReload=false;burstN=0;
