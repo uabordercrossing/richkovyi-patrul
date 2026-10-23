@@ -806,7 +806,7 @@ function draw(){
  for(const q of sp){const p=q.t/q.L,h=36*Math.sin(Math.min(1,p*1.6)*Math.PI/2)*(1-Math.max(0,(p-.5)/.5)),w=10*(1-p*.35),a=.85*(1-p*.75);g.fillStyle='rgba(255,255,255,'+a*.5+')';g.beginPath();g.ellipse(q.x,q.y,w*1.7,w*.6,0,0,7);g.fill();if(h>1){g.fillStyle='rgba(225,245,255,'+a+')';g.beginPath();g.moveTo(q.x-w,q.y);g.quadraticCurveTo(q.x-w*.45,q.y-h*.55,q.x-w*.5,q.y-h);g.arc(q.x,q.y-h,w*.5,Math.PI,0);g.quadraticCurveTo(q.x+w*.45,q.y-h*.55,q.x+w,q.y);g.closePath();g.fill();g.fillStyle='rgba(255,255,255,'+a+')';g.fillRect(q.x-w*.2,q.y-h*.9,w*.3,h*.8)}}
  for(const f of dr){g.fillStyle='rgba(240,250,255,'+Math.min(1,f.life*2.5)+')';g.beginPath();g.arc(f.x,f.y,1.8,0,7);g.fill()}
  gl.forEach(glider);
- sw.forEach(person);
+ sw.forEach(s=>{if(s.st!=='done')person(s)});
  // boat
  g.shadowBlur=0;const bx=boat.x,by=boat.y+Math.sin(t*3)*1.2;boat.y0=by;
  g.fillStyle='rgba(0,0,0,.22)';g.beginPath();hullPath(bx+3,by+7,36,46,19);g.fill();
